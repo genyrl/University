@@ -1,5 +1,6 @@
 ﻿using Microsoft.Office.Interop.Excel;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,7 +14,9 @@ namespace Data
             Help();
             List<Student> students = new List<Student>()
             {
-             new Student("Висковатов",1,2050)
+             new Student("Висковатов",1,2050),
+             new Student("Стасян",3,1000),
+             new Student("Ленин",2, 5000)
             };
             bool exit = true;
             do
@@ -77,7 +80,7 @@ namespace Data
 
                     case "сорт":
 
-                        if (com.Length == 3)
+                        if (com.Length == 3 && (com[1] =="имя" || com[1] == "курс" || com[1] == "стипендия") && (com[2] == "убывание" || com[2] == "возрастание"))
                           students =  Sortby(students, com[1], com[2]);
                         else
                             Console.WriteLine("Неверно написана команда Сорт!");
@@ -191,34 +194,26 @@ namespace Data
         }
         static List<Student>  Sortby(List<Student> students, string sort, string forward)
         {
-            bool check = false;
+           
             switch (sort)
             {
                 case "имя":
-                    if (forward == "убывание")
-                    { students = students.OrderByDescending(x => x.LastName).ToList(); check = true; }
-                    else if (forward == "возрастание")
-                    { students = students.OrderBy(x => x.LastName).ToList(); check = true; }
+                    students.Sort(new SortByName());
                     break;
                 case "курс":
-                    if (forward == "убывание")
-                    { students = students.OrderByDescending(x => x.Curse).ToList(); check = true; }
-                    else if (forward == "возрастание")
-                    { students = students.OrderBy(x => x.Curse).ToList(); check = true; }
+                    students.Sort(new SortByCurse());
                     break;
                 case "стипендия":
-                    if (forward == "убывание")
-                    { students = students.OrderByDescending(x => x.Fee).ToList(); check = true; }
-                    else if (forward == "возрастание")
-                    { students = students.OrderBy(x => x.Fee).ToList(); check = true; }
+                    students.Sort(new SortByFee());
                     break;
+                
             }
-            if (check)
-                PrintCon(students);
-
-            else
-                Console.WriteLine("Неверно написана команда Сорт!");
+            if (forward == "убывание")
+                students.Reverse();
+            PrintCon(students);
             return students;
+
+
         }
 
         static void Add(List<Student> students, int id, Student nw)
@@ -279,5 +274,34 @@ namespace Data
             Edit(name, course, Fee);
         }
     }
+
+    public class SortByName: IComparer<Student>
+    {
+    
+        int IComparer<Student>.Compare(Student x, Student y)
+        {
+            return String.Compare(x.LastName, y.LastName);
+        }
+
+    }
+    public class SortByCurse: IComparer<Student>
+    {
+        int IComparer<Student>.Compare(Student x, Student y)
+        {
+            if (x.Curse > y.Curse) return 1;
+            else if (x.Curse<y.Curse) return -1;
+            else return 0;
+        }
+    }
+    public class SortByFee : IComparer<Student>
+    {
+        int IComparer<Student>.Compare(Student x, Student y)
+        {
+            if(x.Fee > y.Fee) return 1;
+            else if(x.Fee < y.Fee) return -1; 
+            else return 0;
+        }
+    }
+
 
 }
